@@ -1,4 +1,4 @@
-# sa-frontend
+# frontend-app
 
 > A Vue.js project
 
