@@ -1,0 +1,10 @@
+pymongo
+motor
+aiohttp.web
+pykafka
+kazoo
+ujson
+uvloop
+scikit-learn
+elasticsearch-py
+elasticsearch_dsl-py
