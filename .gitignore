@@ -1,3 +1,8 @@
+# idea & pycharm
+.idea/
+*.iws
+*.iml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
