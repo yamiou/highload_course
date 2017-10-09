@@ -1,21 +1,23 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Hello from '@/components/Hello'
-import HelloD3 from '@/components/HelloD3'
+
+const routerOptions = [
+  { path: '/', component: 'Landing' },
+  { path: '/signin', component: 'Signin' },
+  { path: '/signup', component: 'Signup' },
+  { path: '/home', component: 'Home' }
+]
+
+const routes = routerOptions.map(route => {
+  return {
+    path: route.path,
+    component: () => import(`@/components/${route.component}.vue`)
+  }
+})
 
 Vue.use(Router)
 
 export default new Router({
-  routes: [
-    {
-      path: '/',
-      name: 'Hello',
-      component: Hello
-    },
-    {
-      path: '/d3',
-      name: 'Hello D3',
-      component: HelloD3
-    }
-  ]
+  mode: 'history',
+  routes
 })

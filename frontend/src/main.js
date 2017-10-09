@@ -8,6 +8,7 @@ import * as d3 from 'd3'
 
 import App from './App'
 import router from './router'
+import { store } from './store'
 
 Vue.use(Vuetify)
 
@@ -18,6 +19,6 @@ Vue.prototype.$d3 = d3
 new Vue({
   el: '#app',
   router,
-  template: '<App/>',
-  components: { App }
+  store,
+  render: h => h(App)
 })
