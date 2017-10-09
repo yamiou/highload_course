@@ -10,10 +10,9 @@ import App from './App'
 import router from './router'
 import { store } from './store'
 
-Vue.use(Vuetify)
-
-Vue.config.productionTip = false
 Vue.prototype.$d3 = d3
+Vue.use(Vuetify)
+Vue.config.productionTip = false
 
 /* eslint-disable no-new */
 new Vue({
