@@ -1,6 +1,11 @@
 <template>
-  <div class="viewport treeclass" v-resize="resize">
-  </div>
+  <v-layout column>
+    <v-flex xs12 sm6 offset-sm3 mt-3>
+      <div v-resize="resize">
+        <!--svg> </svg-->
+      </div>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
