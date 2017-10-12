@@ -48,10 +48,11 @@
   export default {
     data () {
       return {
-        appTitle: 'Awesome App',
+        appTitle: 'RArticler',
         sidebar: false,
         menuItems: [
-          { title: 'Home', path: '/home', icon: 'home' },
+          { title: 'Library', path: '/library', icon: 'home' },
+          { title: 'Search', path: '/search', icon: 'search' },
           { title: 'Sign Up', path: '/signup', icon: 'face' },
           { title: 'Sign In', path: '/signin', icon: 'lock_open' }
         ],

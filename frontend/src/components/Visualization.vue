@@ -1,9 +1,7 @@
 <template>
   <v-layout column>
-    <v-flex xs12 sm6 offset-sm3 mt-3>
-      <div v-resize="resize">
-        <!--svg> </svg-->
-      </div>
+    <v-flex class="text-xs-center" mt-5>
+      <svg> </svg>
     </v-flex>
   </v-layout>
 </template>
@@ -53,7 +51,7 @@ export default {
   mounted () {
     var d3 = this.$d3
     // const size = this.getSize()
-    const svg = d3.select(this.$el).append('svg')
+    const svg = d3.select('svg') // (this.$el).append('svg')
     //      .attr('width', size.width)
     //      .attr('height', size.height)
     var width = svg.attr('width')
