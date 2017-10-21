@@ -1,6 +1,6 @@
 pymongo
 motor
-aiohttp.web
+sanic
 pykafka
 kazoo
 ujson
@@ -8,3 +8,9 @@ uvloop
 scikit-learn
 elasticsearch-py
 elasticsearch_dsl-py
+aioredis
+aiokafka
+lz4tools
+xxhash
+elasticsearch-async
+sanic-openapi
