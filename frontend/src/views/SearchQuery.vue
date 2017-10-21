@@ -8,6 +8,7 @@
               name="query"
               id="query"
               type="text"
+              placeholder="Input your query here"
               required></v-text-field>
           </v-flex>
           <v-flex class="text-xs-center" mt-5>

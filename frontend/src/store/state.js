@@ -1,3 +1,4 @@
 export const state = {
-  appTitle: 'My Awesome App'
+  appTitle: 'RArticler',
+  authorized: false
 }

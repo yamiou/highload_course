@@ -25,15 +25,16 @@
       </v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items class="hidden-xs-only">
-      <v-btn
-        flat
-        v-for="item in menuItems"
-        :key="item.title"
-        :to="item.path">
-        <v-icon left dark>{{ item.icon }}</v-icon>
-        {{ item.title }}
+        <v-btn
+          flat
+          v-for="item in menuItems"
+          v-if="item.visible"
+          :key="item.title"
+          :to="item.path">
+          <v-icon left dark>{{ item.icon }}</v-icon>
+          {{ item.title }}
       </v-btn>
-</v-toolbar-items>
+    </v-toolbar-items>
     </v-toolbar>
 
     <main>
@@ -48,19 +49,20 @@
   export default {
     data () {
       return {
-        appTitle: 'RArticler',
-        sidebar: false,
-        menuItems: [
-          { title: 'Library', path: '/library', icon: 'home' },
-          { title: 'Search', path: '/search', icon: 'search' },
-          { title: 'Sign Up', path: '/signup', icon: 'face' },
-          { title: 'Sign In', path: '/signin', icon: 'lock_open' }
-        ],
-        computed: {
-          appTitle () {
-            return this.$store.getters.appTitle
-          }
-        }
+        sidebar: false
+      }
+    },
+    computed: {
+      appTitle () {
+        return this.$store.getters.appTitle
+      },
+      menuItems () {
+        return [
+            { title: 'Library', path: '/library', icon: 'home', visible: this.$store.getters.authorized },
+            { title: 'Search', path: '/search', icon: 'search', visible: true },
+            { title: 'Sign Up', path: '/signup', icon: 'face', visible: !this.$store.getters.authorized },
+            { title: 'Sign In', path: '/signin', icon: 'lock_open', visible: !this.$store.getters.authorized }
+        ]
       }
     }
   }

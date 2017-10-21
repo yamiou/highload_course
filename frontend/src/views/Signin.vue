@@ -23,14 +23,25 @@
               required></v-text-field>
           </v-flex>
           <v-flex class="text-xs-center" mt-5>
-            <v-btn primary type="submit">Sign In</v-btn>
+            <v-btn primary type="submit">
+              Sign In
+            </v-btn>
           </v-flex>
         </v-layout>
       </form>
+      <v-btn v-on:click="authorize()">
+        Fake Sign In
+      </v-btn>
     </v-flex>
   </v-layout>
 </template>
 
 <script>
-export default {}
+export default {
+  methods: {
+    authorize: function () {
+      this.$store.commit('authorized')
+    }
+  }
+}
 </script>
