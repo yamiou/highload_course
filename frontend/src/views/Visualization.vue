@@ -1,41 +1,20 @@
 <template>
-  <v-layout column>
-    <v-flex class="text-xs-center" mt-5>
-      <svg> </svg>
-    </v-flex>
-  </v-layout>
+  <v-container align-content-center='true' justify-center='true' width='100%' height='100%'>
+    <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="500"
+    height="500"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:svg="http://www.w3.org/2000/svg"
+    xml:space="preserve"
+    viewBox="0 0 500 500">
+  </svg>
+  </v-container>
 </template>
 
 <script>
 import resize from 'vue-resize-directive'
-var i = 0
-const props = {
-  data: Object,
-  duration: {
-    type: Number,
-    default: 750
-  },
-  marginX: {
-    type: Number,
-    default: 20
-  },
-  marginY: {
-    type: Number,
-    default: 20
-  },
-  nodeText: {
-    type: String,
-    required: true
-  },
-  identifier: {
-    type: Function,
-    default: () => i++
-  },
-  zoomable: {
-    type: Boolean,
-    default: false
-  }
-}
+const props = {}
 
 const directives = {
   resize
@@ -49,20 +28,25 @@ export default {
     return {}
   },
   mounted () {
-    var d3 = this.$d3
+    const d3 = this.$d3
     // const size = this.getSize()
-    const svg = d3.select('svg') // (this.$el).append('svg')
+    const svg = d3.select('svg')
     //      .attr('width', size.width)
     //      .attr('height', size.height)
-    var width = svg.attr('width')
-    var height = svg.attr('height')
+    // var bbox = svg.getBBox()
+
+    // svg.setAttribute('width', bbox.x + bbox.width + 'px')
+    // svg.setAttribute('height', bbox.y + bbox.height + 'px')
+
+    // var width = svg.outerWidth()  // attr('width')
+    // var height = svg.outerHeight()  // attr('height')
 
     var color = d3.scaleOrdinal(d3.schemeCategory20)
 
     var simulation = d3.forceSimulation()
           .force('link', d3.forceLink().id(function (d) { return d.id }))
           .force('charge', d3.forceManyBody())
-          .force('center', d3.forceCenter(width / 2, height / 2))
+          // .force('center', d3.forceCenter(width / 2, height / 2))
 
     d3.json('/static/miserables.json', function (error, graph) {
       if (error) throw error
