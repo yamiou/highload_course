@@ -21,17 +21,23 @@ async def log_uri(request):
 
 async def query_from_db(query):
     result = await db.search(index='abstracts', doc_type='abstract',
-                             body={
-                                 "query": {
-                                     "match": {
-                                         "doc.abstract": query
-                                     }
-                                 }
-                             })
+                             body = {
+                                "query": {
+                                    "multi_match" : {
+                                        "query" : query,
+                                        "type": "most_fields",
+                                        "operator": "and",
+                                        "fields": [
+                                            'abstract',
+                                            'title']
+                                    }
+                                }
+                             },
+                             size=250)
     if result['hits']['total'] == 0:
         docs = []
     else:
-        docs = [hit['_source']['doc'] for hit in result['hits']['hits']]
+        docs = [hit['_source'] for hit in result['hits']['hits']]
     return docs
 
 
