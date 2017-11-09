@@ -4,5 +4,8 @@ export const getters = {
   },
   authorized (state) {
     return state.authorized
+  },
+  lastResult (state) {
+    return state.lastResult
   }
 }

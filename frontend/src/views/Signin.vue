@@ -29,9 +29,9 @@
           </v-flex>
         </v-layout>
       </form>
-      <v-btn v-on:click="authorize()">
+      <!--v-btn v-on:click="authorize()" >
         Fake Sign In
-      </v-btn>
+    </v-btn-->
     </v-flex>
   </v-layout>
 </template>

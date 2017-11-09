@@ -1,4 +1,5 @@
 export const state = {
   appTitle: 'RArticler',
-  authorized: false
+  authorized: false,
+  lastResult: {'query': '', 'answer': []}
 }

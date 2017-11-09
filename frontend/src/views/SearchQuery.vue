@@ -1,12 +1,13 @@
 <template>
   <v-layout column>
     <v-flex xs12 sm6 offset-sm3 mt-3>
-      <form>
+      <form @submit.prevent="submitQuery()">
         <v-layout column>
           <v-flex>
             <v-text-field
               name="query"
               id="query"
+              v-model="query"
               type="text"
               placeholder="Input your query here"
               required></v-text-field>
@@ -19,3 +20,28 @@
     </v-flex>
   </v-layout>
 </template>
+
+<script>
+import * as axios from 'axios'
+export default {
+  data () {
+    return {
+      query: ''
+    }
+  },
+  methods: {
+    submitQuery: function () {
+      var store = this.$store
+      axios.get('/api/search/' + this.query)
+      .then(res => {
+        console.log(res)
+        store.commit('lastResult', res.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+      this.$router.push('results')
+    }
+  }
+}
+</script>
