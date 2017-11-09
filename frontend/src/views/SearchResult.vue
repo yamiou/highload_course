@@ -9,10 +9,10 @@
             <v-list-tile avatar v-else v-bind:key="item.clean_id" @click="">
               <v-list-tile-avatar>
                 <!--img v-bind:src="item.avatar"/-->
-                <v-icon>mdi-mouse</v-icon>
+                <v-icon>question_answer</v-icon>
               </v-list-tile-avatar>
               <v-list-tile-content v-on:click="openInNewTab(item.link)">
-                <v-list-tile-title v-html="item.clean_id"></v-list-tile-title>
+                <v-list-tile-title v-html="item.title"></v-list-tile-title>
                 <v-list-tile-sub-title v-html="item.abstract"></v-list-tile-sub-title>
               </v-list-tile-content>
             </v-list-tile>
