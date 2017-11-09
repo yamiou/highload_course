@@ -1,3 +1,4 @@
+from urllib.parse import unquote
 from sanic import Sanic
 from sanic.response import json
 import logging
@@ -33,7 +34,7 @@ async def query_from_db(query):
                                     }
                                 }
                              },
-                             size=250)
+                             size=350)
     if result['hits']['total'] == 0:
         docs = []
     else:
@@ -47,7 +48,7 @@ def make_arxiv_link(clean_id):
 
 @app.route('/search/<query>', methods=['GET'])
 async def abstracts(request, query):
-    docs = await query_from_db(query)
+    docs = await query_from_db(unquote(query))
     for doc in docs:
         doc['link'] = make_arxiv_link(doc['clean_id'])
         del doc['file']
