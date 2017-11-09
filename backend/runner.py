@@ -5,7 +5,8 @@ logger = logging.getLogger(__name__)
 
 
 def api_app():
-    pass
+    from api.app import main
+    main()
 
 
 def article_scrapper_app():

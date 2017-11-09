@@ -6,8 +6,8 @@ kazoo
 ujson
 uvloop
 scikit-learn
-elasticsearch-py
-elasticsearch_dsl-py
+elasticsearch
+elasticsearch_dsl
 aioredis
 aiokafka
 lz4tools
