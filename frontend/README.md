@@ -28,3 +28,17 @@ npm test
 ```
 
 For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+## Nginx site config
+```
+        # it assumes that content from dist/ after build placed into /var/nginx-www/highload
+        # and htpasswd file is /etc/nginx/.htpasswd
+        root   /var/nginx-www/highload;
+        index  index.html index.htm;
+
+        location / {
+            auth_basic "Auth needed";
+            auth_basic_user_file /etc/nginx/.htpasswd;
+            try_files $uri $uri/ /index.html;
+        }
+```
