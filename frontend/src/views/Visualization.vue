@@ -12,6 +12,7 @@
   </v-container>
 </template>
 
+
 <script>
 import resize from 'vue-resize-directive'
 const props = {}

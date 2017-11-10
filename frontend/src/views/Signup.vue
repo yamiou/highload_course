@@ -4,7 +4,7 @@
       <h3>Sign Up</h3>
     </v-flex>
     <v-flex xs12 sm6 offset-sm3 mt-3>
-      <form>
+      <form @submit.prevent="register()">
         <v-layout column>
           <v-flex>
             <v-text-field
@@ -12,6 +12,7 @@
               label="Email"
               id="email"
               type="email"
+              v-model="email"
               required></v-text-field>
           </v-flex>
           <v-flex>
@@ -20,6 +21,7 @@
               label="Password"
               id="password"
               type="password"
+              v-model="password"
               required></v-text-field>
           </v-flex>
           <v-flex>
@@ -28,6 +30,7 @@
               label="Confirm Password"
               id="confirmPassword"
               type="password"
+              v-model="confirmPassword"
               ></v-text-field>
           </v-flex>
           <v-flex class="text-xs-center" mt-5>
@@ -39,6 +42,34 @@
   </v-layout>
 </template>
 
+
 <script>
-export default {}
+import * as axios from 'axios'
+export default {
+  data () {
+    return {
+      email: '',
+      password: '',
+      confirmPassword: ''
+    }
+  },
+  methods: {
+    register: function () {
+      // this.$store.commit('authorized')
+      this.$router.push('signin')
+    },
+    submitQuery: function () {
+      var store = this.$store
+      axios.get('/api/search/')
+      .then(res => {
+        console.log(res)
+        store.commit('lastResult', res.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+      this.$router.push('signin')
+    }
+  }
+}
 </script>

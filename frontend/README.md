@@ -35,10 +35,10 @@ For detailed explanation on how things work, checkout the [guide](http://vuejs-t
         # and htpasswd file is /etc/nginx/.htpasswd
         root   /var/nginx-www/highload;
         index  index.html index.htm;
+        auth_basic "Auth needed";
+        auth_basic_user_file /etc/nginx/.htpasswd;
 
         location / {
-            auth_basic "Auth needed";
-            auth_basic_user_file /etc/nginx/.htpasswd;
             try_files $uri $uri/ /index.html;
         }
 ```

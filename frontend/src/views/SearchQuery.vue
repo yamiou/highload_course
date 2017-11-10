@@ -21,6 +21,7 @@
   </v-layout>
 </template>
 
+
 <script>
 import * as axios from 'axios'
 export default {

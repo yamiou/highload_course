@@ -1,6 +1,6 @@
 <template>
   <v-layout row>
-    <v-flex xs12 sm6 offset-sm3>
+    <v-flex xs12 sm6 offset-sm3 mt-3>
       <v-card>
         <v-list three-line>
           <template v-for="item in items">
