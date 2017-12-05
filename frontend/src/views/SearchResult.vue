@@ -1,7 +1,8 @@
 <template>
   <v-layout row>
-    <v-flex xs12 sm6 offset-sm3 mt-3>
-      <v-card>
+    <v-flex xs12 sm6 offset-sm3 mt-1>
+       <v-card>
+        <v-progress-linear v-if="loading" v-bind:indeterminate="true"></v-progress-linear>
         <v-list three-line>
           <template v-for="item in items">
             <v-subheader v-if="item.header" v-text="item.header"></v-subheader>
@@ -18,34 +19,69 @@
             </v-list-tile>
           </template>
         </v-list>
+        <v-progress-linear v-if="loading" v-bind:indeterminate="true"></v-progress-linear>
       </v-card>
+     <v-pagination v-bind:length="totalPages" v-model="page" circle></v-pagination>
     </v-flex>
   </v-layout>
 </template>
 
+
 <script>
+  import * as axios from 'axios'
   export default {
     data () {
       return {
+        page: 1,
+        loading: false
       }
     },
     computed: {
       items () {
         var lastResult = this.$store.getters.lastResult
-        var itms = [{ header: lastResult.query }]
-        var ans = lastResult.answer
+        if (lastResult.answer.page !== this.page) {
+          this.changePage()
+        }
+        var itms = [{ header: 'Results for: ' + lastResult.query }]
+        var ans = lastResult.answer.items
         var i
         for (i = 0; i < ans.length; i++) {
           itms.push(ans[i])
           itms.push({ divider: true, inset: true })
         }
         return itms
+      },
+      totalPages () {
+        var lastResult = this.$store.getters.lastResult
+        var totalPages = lastResult.answer.pages
+        return totalPages
+      },
+      currentPage () {
+        var lastResult = this.$store.getters.lastResult
+        var currentPage = lastResult.answer.page
+        return currentPage
       }
     },
     methods: {
       openInNewTab: function (url) {
         var win = window.open(url, '_blank')
         win.focus()
+      },
+      changePage: function () {
+        var store = this.$store
+        var lastResult = store.getters.lastResult
+        this.loading = true
+        axios.get('/api/search?query=' + lastResult.query + '&page=' + this.page)
+        .then(res => {
+          console.log(res)
+          store.commit('lastResult', res.data)
+          this.loading = false
+        })
+        .catch(err => {
+          this.loading = false
+          alert(err)
+          console.log(err)
+        })
       }
     }
   }

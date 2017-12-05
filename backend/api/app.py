@@ -20,7 +20,10 @@ async def log_uri(request):
     logger.info("URI called: {0}".format(request.url))
 
 
-async def query_from_db(query):
+async def query_from_db(query, page):
+    page_size = 10
+    start = page_size * (page - 1)
+
     result = await db.search(index='abstracts', doc_type='abstract',
                              body = {
                                 "query": {
@@ -34,25 +37,32 @@ async def query_from_db(query):
                                     }
                                 }
                              },
-                             size=350)
-    if result['hits']['total'] == 0:
+                             size=page_size,
+                             from_=start)
+    hits = result['hits']['total']
+    pages = min(max(1, hits // page_size + (hits % page_size > 0)), 100)
+
+    if hits == 0:
         docs = []
     else:
         docs = [hit['_source'] for hit in result['hits']['hits']]
-    return docs
+    return docs, pages
 
 
 def make_arxiv_link(clean_id):
     return f'https://arxiv.org/abs/{clean_id}'
 
 
-@app.route('/search/<query>', methods=['GET'])
-async def abstracts(request, query):
-    docs = await query_from_db(unquote(query))
+@app.route('/search', methods=['GET'])
+async def abstracts(request):
+    query = request.args.get('query', '')
+    page = int(request.args.get('page', '1'))
+    docs, pages = await query_from_db(unquote(query), page)
     for doc in docs:
         doc['link'] = make_arxiv_link(doc['clean_id'])
         del doc['file']
-    return json({'query': query, 'answer': docs})
+    return json({'query': query, 'answer':
+                    {'items': docs, 'page': page, 'pages': pages}})
 
 
 def setup_logging():

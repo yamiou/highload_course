@@ -33,12 +33,13 @@ export default {
   methods: {
     submitQuery: function () {
       var store = this.$store
-      axios.get('/api/search/' + this.query)
+      axios.get('/api/search?query=' + this.query)
       .then(res => {
         console.log(res)
         store.commit('lastResult', res.data)
       })
       .catch(err => {
+        alert(err)
         console.log(err)
       })
       this.$router.push('results')
