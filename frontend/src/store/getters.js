@@ -7,5 +7,8 @@ export const getters = {
   },
   lastResult (state) {
     return state.lastResult
+  },
+  access_token (state) {
+    return state.access_token
   }
 }

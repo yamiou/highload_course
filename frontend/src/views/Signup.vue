@@ -4,7 +4,7 @@
       <h3>Sign Up</h3>
     </v-flex>
     <v-flex xs12 sm6 offset-sm3 mt-3>
-      <form @submit.prevent="register()">
+      <form @submit.prevent="if(password === confirmPassword) { register() } else {alert('Passwords not match with confirmation!')}">
         <v-layout column>
           <v-flex>
             <v-text-field
@@ -55,20 +55,17 @@ export default {
   },
   methods: {
     register: function () {
-      // this.$store.commit('authorized')
-      this.$router.push('signin')
-    },
-    submitQuery: function () {
-      var store = this.$store
-      axios.get('/api/search/')
+      var router = this.$router
+      axios.post('/api/register', {'email': this.email, 'username': this.email, 'password': this.password})
       .then(res => {
-        console.log(res)
-        store.commit('lastResult', res.data)
+        console.log(res.data.register_result)
+        alert(res.data.register_result)
+        router.push('signin')
       })
       .catch(err => {
         console.log(err)
+        alert(err)
       })
-      this.$router.push('signin')
     }
   }
 }
