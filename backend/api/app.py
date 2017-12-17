@@ -1,4 +1,4 @@
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
 import uuid
 import hashlib
 from sanic import Sanic
@@ -7,6 +7,7 @@ import logging
 
 logger = None
 app = Sanic('rarticler_api')
+app.config.SANIC_JWT_AUTHORIZATION_HEADER = "authorization2"
 
 from sanic_jwt.decorators import protected
 from sanic_jwt import exceptions
@@ -60,26 +61,25 @@ async def authenticate(request, *args, **kwargs):
     if compute_pass_hash(password) != user.password_hash:
         raise exceptions.AuthenticationFailed("Password is incorrect.")
 
+    user.password_hash = ''
+
     return user
 
+
 initialize(app, authenticate)
-
-
-@app.route("/protected")
-@protected()
-async def protected_route(request):
-    return json({"protected": True})
 
 
 @app.listener('before_server_start')
 def init(sanic, loop):
     global db
     global db2
+    global db3
     from elasticsearch_async import AsyncElasticsearch
     from motor.motor_asyncio import AsyncIOMotorClient
     mongo_uri = "mongodb://127.0.0.1:27017/"
     db = AsyncElasticsearch(hosts=['localhost'])
     db2 = AsyncIOMotorClient(mongo_uri)['highload']['users']
+    db3 = AsyncIOMotorClient(mongo_uri)['highload']['library_documents']
 
 
 @app.middleware("request")
@@ -140,6 +140,75 @@ async def register(request):
     email = request.json['email']
     register_result = await put_user_to_mongo(username, password, email)
     return json({'register_result': register_result})
+
+
+async def query_from_library(username, page):
+    page_size = 10
+    start = page_size * (page - 1)
+
+    cursor = db3.find(dict(username=username))
+    links = await cursor.to_list(1000000)
+    hits = len(links)
+    pages = max(1, hits // page_size + (hits % page_size > 0))
+
+    if hits == 0:
+        docs = []
+    else:
+        links = list(map(lambda x: quote(x['clean_id']),
+                     links[start:page_size * page]))
+        results = []
+        for link in links:
+
+            result = await db.get(index='abstracts', doc_type='abstract',
+                               id=link)
+
+            results.append(result['_source'])
+
+        docs = results
+
+    return docs, pages
+
+
+@app.route('/library/list', methods=['GET'])
+@protected()
+async def library_list(request):
+    username = request.args.get('username', None)
+    page = int(request.args.get('page', '1'))
+    docs, pages = await query_from_library(unquote(username), page)
+    for doc in docs:
+        doc['link'] = make_arxiv_link(doc['clean_id'])
+        del doc['file']
+    return json({'query': username, 'answer':
+                    {'items': docs, 'page': page, 'pages': pages}})
+
+
+async def add_to_library(username, clean_id):
+    if (await db3.find(dict(username=username, clean_id=clean_id)).count()) > 0:
+        return False
+    result = await db3.insert_one(dict(username=username, clean_id=clean_id))
+    return True
+
+@app.route('/library/add', methods=['POST'])
+@protected()
+async def library_add(request):
+    username = request.json['username']
+    clean_id = request.json['clean_id']
+    result = await add_to_library(username, clean_id)
+    return json({'result': result})
+
+
+async def remove_from_library(username, clean_id):
+    result = await db3.delete_many(dict(username=username, clean_id=clean_id))
+    return True
+
+
+@app.route('/library/remove', methods=['POST'])
+@protected()
+async def library_remove(request):
+    username = request.json['username']
+    clean_id = request.json['clean_id']
+    result = await remove_from_library(username, clean_id)
+    return json({'result': result})
 
 
 def setup_logging():

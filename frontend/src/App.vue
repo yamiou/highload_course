@@ -37,7 +37,6 @@
       </v-btn>
     </v-toolbar-items>
     </v-toolbar>
-
     <main>
       <v-container fluid>
         <router-view></router-view>
@@ -83,6 +82,23 @@
     }
   }
 </script>
+
 <style lang="stylus">
   @import './stylus/main'
+</style>
+
+<style>
+.toolbar__extension,
+.tabs__wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.toolbar__title,
+.tabs__container {
+  background-color: rgba(255, 255, 255, 0.2);
+  justify-content: flex-start !important;
+  max-width: 600px;
+  width: 100%;
+}
 </style>

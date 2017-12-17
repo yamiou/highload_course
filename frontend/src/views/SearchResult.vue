@@ -16,6 +16,11 @@
                 <v-list-tile-title v-html="item.title"></v-list-tile-title>
                 <v-list-tile-sub-title v-html="item.abstract"></v-list-tile-sub-title>
               </v-list-tile-content>
+              <v-list-tile-action>
+                <v-btn icon ripple v-on:click="addToLibrary(item.clean_id)" v-if="authorized" title="Add to Library">
+                  <v-icon color="grey lighten-1">archive</v-icon>
+                </v-btn>
+              </v-list-tile-action>
             </v-list-tile>
           </template>
         </v-list>
@@ -60,6 +65,9 @@
         var lastResult = this.$store.getters.lastResult
         var currentPage = lastResult.answer.page
         return currentPage
+      },
+      authorized () {
+        return this.$store.getters.authorized
       }
     },
     methods: {
@@ -75,6 +83,21 @@
         .then(res => {
           console.log(res)
           store.commit('lastResult', res.data)
+          this.loading = false
+        })
+        .catch(err => {
+          this.loading = false
+          alert(err)
+          console.log(err)
+        })
+      },
+      addToLibrary: function (cleanId) {
+        var store = this.$store
+        var username = store.getters.username
+        this.loading = true
+        axios.post('/api/library/add/', {'username': username, 'clean_id': cleanId})
+        .then(res => {
+          console.log(res)
           this.loading = false
         })
         .catch(err => {

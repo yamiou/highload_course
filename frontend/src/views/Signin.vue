@@ -46,6 +46,18 @@ export default {
     }
   },
   methods: {
+    getUserName: function () {
+      var store = this.$store
+      axios.get('/api/auth/me')
+      .then(res => {
+        var data = res.data.me
+        store.commit('username', data['username'])
+      })
+      .catch(err => {
+        console.log(err)
+        alert(err)
+      })
+    },
     authorize: function () {
       var store = this.$store
       var router = this.$router
@@ -53,9 +65,11 @@ export default {
       .then(res => {
         var data = res.data
         console.log(res)
-        axios.defaults.headers.common['Authorization'] = 'Bearer' + data.access_token
+        axios.defaults.headers.common['authorization2'] = 'Bearer ' + data.access_token
         store.commit('authorized')
         store.commit('access_token', data.access_token)
+        store.commit('username', this.email)
+        // this.getUserName()
         router.push('search')
       })
       .catch(err => {
