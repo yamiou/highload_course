@@ -46,21 +46,36 @@ export default {
     }
   },
   methods: {
-    authorize: function () {
-      this.$store.commit('authorized')
-      this.$router.push('search')
-    },
-    submitQuery: function () {
+    getUserName: function () {
       var store = this.$store
-      axios.get('/api/search/')
+      axios.get('/api/auth/me')
       .then(res => {
-        console.log(res)
-        store.commit('lastResult', res.data)
+        var data = res.data.me
+        store.commit('username', data['username'])
       })
       .catch(err => {
         console.log(err)
+        alert(err)
       })
-      this.$router.push('results')
+    },
+    authorize: function () {
+      var store = this.$store
+      var router = this.$router
+      axios.post('/api/auth/', {'username': this.email, 'password': this.password})
+      .then(res => {
+        var data = res.data
+        console.log(res)
+        axios.defaults.headers.common['authorization2'] = 'Bearer ' + data.access_token
+        store.commit('authorized')
+        store.commit('access_token', data.access_token)
+        store.commit('username', this.email)
+        // this.getUserName()
+        router.push('search')
+      })
+      .catch(err => {
+        console.log(err)
+        alert(err)
+      })
     }
   }
 }

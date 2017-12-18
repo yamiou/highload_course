@@ -7,5 +7,14 @@ export const getters = {
   },
   lastResult (state) {
     return state.lastResult
+  },
+  lastLibResult (state) {
+    return state.lastLibResult
+  },
+  access_token (state) {
+    return state.access_token
+  },
+  username (state) {
+    return state.username
   }
 }

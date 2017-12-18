@@ -55,20 +55,21 @@ export default {
   },
   methods: {
     register: function () {
-      // this.$store.commit('authorized')
-      this.$router.push('signin')
-    },
-    submitQuery: function () {
-      var store = this.$store
-      axios.get('/api/search/')
-      .then(res => {
-        console.log(res)
-        store.commit('lastResult', res.data)
-      })
-      .catch(err => {
-        console.log(err)
-      })
-      this.$router.push('signin')
+      if (this.password === this.confirmPassword) {
+        var router = this.$router
+        axios.post('/api/register', {'email': this.email, 'username': this.email, 'password': this.password})
+        .then(res => {
+          console.log(res.data.register_result)
+          alert(res.data.register_result)
+          router.push('signin')
+        })
+        .catch(err => {
+          console.log(err)
+          alert(err)
+        })
+      } else {
+        alert('Password not match with confirmation!')
+      }
     }
   }
 }
