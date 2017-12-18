@@ -230,7 +230,7 @@ def main():
     global logger
     configure()
     logger = logging.getLogger()
-    app.run(host="127.0.0.1", port=7080)
+    app.run(host="127.0.0.1", port=7080, workers=8)
 
 
 if __name__ == "__main__":
