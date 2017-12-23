@@ -1,17 +1,25 @@
 from urllib.parse import unquote, quote
 import uuid
 import hashlib
+import logging
+
 from sanic import Sanic
 from sanic.response import json
-import logging
+from sanic_jwt.decorators import protected
+from sanic_jwt import exceptions
+from sanic_jwt import initialize
+
+SALT = b'q9890as89dfh'
+PAGE_SIZE = 10
+MAX_PAGES = 100
 
 logger = None
 app = Sanic('rarticler_api')
 app.config.SANIC_JWT_AUTHORIZATION_HEADER = "authorization2"
 
-from sanic_jwt.decorators import protected
-from sanic_jwt import exceptions
-from sanic_jwt import initialize
+es = None
+users = None
+library_documents = None
 
 
 class User(object):
@@ -25,13 +33,16 @@ class User(object):
 
 
 def compute_pass_hash(password):
-    return hashlib.sha512(password.encode('utf-8') + b'q9890as89dfh').hexdigest()
+    return hashlib.sha512(
+        password.encode('utf-8') + SALT).hexdigest()
+
 
 async def get_user_from_mongo(username):
-    user_data = await db2.find_one(dict(username=username))
+    user_data = await users.find_one(dict(username=username))
     if not user_data:
         return None
-    return User(id=user_data['user_id'], password_hash=user_data['password_hash'],
+    return User(id=user_data['user_id'],
+                password_hash=user_data['password_hash'],
                 username=user_data['username'])
 
 
@@ -41,8 +52,8 @@ async def put_user_to_mongo(username, password, email):
     if exists:
         return f'User { username } already exists!'
     pass_hash = compute_pass_hash(password)
-    await db2.insert_one(dict(user_id=uid, email=email,
-                        username=username, password_hash=pass_hash))
+    await users.insert_one(dict(user_id=uid, email=email,
+                                username=username, password_hash=pass_hash))
     return f'User { username } created. Please, sign in!'
 
 
@@ -71,15 +82,17 @@ initialize(app, authenticate)
 
 @app.listener('before_server_start')
 def init(sanic, loop):
-    global db
-    global db2
-    global db3
+    global es
+    global users
+    global library_documents
     from elasticsearch_async import AsyncElasticsearch
     from motor.motor_asyncio import AsyncIOMotorClient
+
     mongo_uri = "mongodb://127.0.0.1:27017/"
-    db = AsyncElasticsearch(hosts=['localhost'])
-    db2 = AsyncIOMotorClient(mongo_uri)['highload']['users']
-    db3 = AsyncIOMotorClient(mongo_uri)['highload']['library_documents']
+    es = AsyncElasticsearch(hosts=['localhost'])
+    users = AsyncIOMotorClient(mongo_uri)['highload']['users']
+    library_documents = \
+        AsyncIOMotorClient(mongo_uri)['highload']['library_documents']
 
 
 @app.middleware("request")
@@ -89,26 +102,26 @@ async def log_uri(request):
 
 
 async def query_from_db(query, page):
-    page_size = 10
+    page_size = PAGE_SIZE
     start = page_size * (page - 1)
 
-    result = await db.search(index='abstracts', doc_type='abstract',
-                             body = {
-                                "query": {
-                                    "multi_match" : {
-                                        "query" : query,
-                                        "type": "most_fields",
-                                        "operator": "and",
-                                        "fields": [
-                                            'abstract',
-                                            'title']
-                                    }
-                                }
+    result = await es.search(index='abstracts', doc_type='abstract',
+                             body={
+                                 "query": {
+                                     "multi_match": {
+                                         "query": query,
+                                         "type": "most_fields",
+                                         "operator": "and",
+                                         "fields": [
+                                             'abstract',
+                                             'title']
+                                     }
+                                 }
                              },
                              size=page_size,
                              from_=start)
     hits = result['hits']['total']
-    pages = min(max(1, hits // page_size + (hits % page_size > 0)), 100)
+    pages = min(max(1, hits // page_size + (hits % page_size > 0)), MAX_PAGES)
 
     if hits == 0:
         docs = []
@@ -130,7 +143,7 @@ async def search(request):
         doc['link'] = make_arxiv_link(doc['clean_id'])
         del doc['file']
     return json({'query': query, 'answer':
-                    {'items': docs, 'page': page, 'pages': pages}})
+        {'items': docs, 'page': page, 'pages': pages}})
 
 
 @app.route('/register', methods=['POST'])
@@ -143,10 +156,10 @@ async def register(request):
 
 
 async def query_from_library(username, page):
-    page_size = 10
+    page_size = PAGE_SIZE
     start = page_size * (page - 1)
 
-    cursor = db3.find(dict(username=username))
+    cursor = library_documents.find(dict(username=username))
     links = await cursor.to_list(1000000)
     hits = len(links)
     pages = max(1, hits // page_size + (hits % page_size > 0))
@@ -155,12 +168,11 @@ async def query_from_library(username, page):
         docs = []
     else:
         links = list(map(lambda x: quote(x['clean_id']),
-                     links[start:page_size * page]))
+                         links[start:page_size * page]))
         results = []
         for link in links:
-
-            result = await db.get(index='abstracts', doc_type='abstract',
-                               id=link)
+            result = await es.get(index='abstracts', doc_type='abstract',
+                                  id=link)
 
             results.append(result['_source'])
 
@@ -179,14 +191,20 @@ async def library_list(request):
         doc['link'] = make_arxiv_link(doc['clean_id'])
         del doc['file']
     return json({'query': username, 'answer':
-                    {'items': docs, 'page': page, 'pages': pages}})
+        {'items': docs, 'page': page, 'pages': pages}})
 
 
 async def add_to_library(username, clean_id):
-    if (await db3.find(dict(username=username, clean_id=clean_id)).count()) > 0:
+    is_link_exists = \
+        await library_documents.find(
+            dict(username=username, clean_id=clean_id)).count() > 0
+    if is_link_exists:
         return False
-    result = await db3.insert_one(dict(username=username, clean_id=clean_id))
-    return True
+    else:
+        await library_documents.insert_one(
+            dict(username=username, clean_id=clean_id))
+        return True
+
 
 @app.route('/library/add', methods=['POST'])
 @protected()
@@ -198,7 +216,8 @@ async def library_add(request):
 
 
 async def remove_from_library(username, clean_id):
-    result = await db3.delete_many(dict(username=username, clean_id=clean_id))
+    await library_documents.delete_many(
+        dict(username=username, clean_id=clean_id))
     return True
 
 
