@@ -8,7 +8,7 @@
           :key="item.title"
           :to="item.path">
           <v-list-tile-action>
-            <v-icon>{{ item.icon }}</v-icon>
+            <v-icon color="lime darken-4">{{ item.icon }}</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>{{ item.title }}</v-list-tile-content>
        </v-list-tile>
@@ -32,7 +32,7 @@
           v-if="item.visible"
           :key="item.title"
           :to="item.path">
-          <v-icon left dark>{{ item.icon }}</v-icon>
+          <v-icon left dark color="lime darken-4">{{ item.icon }}</v-icon>
           {{ item.title }}
       </v-btn>
     </v-toolbar-items>
