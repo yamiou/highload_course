@@ -66,11 +66,8 @@ async def authenticate(request, *args, **kwargs):
 
     user = await get_user_from_mongo(username)
 
-    if user is None:
-        raise exceptions.AuthenticationFailed("User not found.")
-
-    if compute_pass_hash(password) != user.password_hash:
-        raise exceptions.AuthenticationFailed("Password is incorrect.")
+    if user is None or compute_pass_hash(password) != user.password_hash:
+        raise exceptions.AuthenticationFailed("Wrong credentials.")
 
     user.password_hash = ''
 
